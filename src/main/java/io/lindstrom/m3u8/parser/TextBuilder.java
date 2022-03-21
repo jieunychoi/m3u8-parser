@@ -51,6 +51,11 @@ class TextBuilder {
         return this;
     }
 
+    public TextBuilder add(float value) {
+        stringBuilder.append(value);
+        return this;
+    }
+
     // Tag helpers
     void addTag(String tag) {
         stringBuilder.append('#').append(tag).append('\n');
@@ -65,6 +70,10 @@ class TextBuilder {
     }
 
     void addTag(String tag, String attribute) {
+        stringBuilder.append('#').append(tag).append(":").append(attribute).append('\n');
+    }
+
+    void addTag(String tag, Float attribute) {
         stringBuilder.append('#').append(tag).append(":").append(attribute).append('\n');
     }
 

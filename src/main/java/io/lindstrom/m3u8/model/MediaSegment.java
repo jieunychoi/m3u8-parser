@@ -1,5 +1,6 @@
 package io.lindstrom.m3u8.model;
 
+import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 
 import java.time.OffsetDateTime;
@@ -9,6 +10,7 @@ import java.util.Optional;
  * Media Segment interface
  */
 @Value.Immutable
+@Serial.Structural
 public interface MediaSegment {
     double duration();
 
@@ -31,7 +33,7 @@ public interface MediaSegment {
         return false;
     }
 
-    Optional<Integer> cueOut();
+    Optional<Float> cueOut();
 
     @Value.Default
     default boolean cueIn() {
@@ -44,6 +46,10 @@ public interface MediaSegment {
     }
 
     Optional<Long> bitrate();
+
+    Optional<Scte35> scte35();
+
+    Optional<CueOutCont> cueOutCont();
 
     static Builder builder() {
         return new Builder();

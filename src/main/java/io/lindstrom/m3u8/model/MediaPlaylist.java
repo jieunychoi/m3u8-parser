@@ -1,5 +1,6 @@
 package io.lindstrom.m3u8.model;
 
+import org.immutables.serial.Serial;
 import org.immutables.value.Value;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
  * Media Playlist interface
  */
 @Value.Immutable
+@Serial.Structural
 public interface MediaPlaylist extends Playlist {
     int targetDuration();
 

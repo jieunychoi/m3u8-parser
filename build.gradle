@@ -5,9 +5,11 @@ apply plugin: 'idea'
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'maven-publish'
 
 ext {
     ideaGeneratedSources = file('out/production/classes/generated')
+    ideaGeneratedSources = file('out/generated')
 }
 
 idea.module {
@@ -22,8 +24,12 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.immutables:value:2.5.6'
+    compileOnly 'org.immutables:value:2.8.2'
+    compileOnly 'org.immutables:serial:2.8.2'
     testCompile 'junit:junit:4.12'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.12.1'
+    compile 'com.nfl.dm.scte35:scte35-decoder:1.0.32-SNAPSHOT'
+    compile 'com.esotericsoftware:kryo:5.0.3'
 }
 
 task javadocJar(type: Jar) {
@@ -88,6 +94,42 @@ if (project.hasProperty('ossrhUsername')) {
                         }
                     }
                 }
+            }
+
+        }
+    }
+}
+
+repositories {
+    maven {
+        url =  URI.create("http://maven.anypoint.tv/repository/public")
+        credentials {
+            username = "dev.anypointmedia"
+            password = "*emflaj*"
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'hls-manipulator'
+            artifactId = 'm3u8-parser'
+            version = '0.0.10-SNAPSHOT'
+
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            // change to point to your repo, e.g. http://my.org/repo
+            def releasesRepoUrl = URI.create("http://maven.anypoint.tv/repository/snapshots")
+            def snapshotsRepoUrl = URI.create("http://maven.anypoint.tv/repository/releases")
+            url = version.endsWith('-SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+
+            credentials {
+                username = "dev.anypointmedia"
+                password = "*emflaj*"
             }
         }
     }

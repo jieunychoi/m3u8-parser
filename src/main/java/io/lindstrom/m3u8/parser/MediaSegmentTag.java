@@ -1,6 +1,10 @@
 package io.lindstrom.m3u8.parser;
 
+import com.nfl.scte35.decoder.Scte35Decoder;
+import com.nfl.scte35.decoder.exception.DecodingException;
+import com.nfl.scte35.decoder.model.SpliceInfoSection;
 import io.lindstrom.m3u8.model.MediaSegment;
+import io.lindstrom.m3u8.model.Scte35;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -63,10 +67,31 @@ enum MediaSegmentTag implements Tag<MediaSegment, MediaSegment.Builder> {
         }
     },
 
+    EXT_OATCLS_SCTE35 {
+        @Override
+        public void read(MediaSegment.Builder builder, String attributes) throws PlaylistParserException {
+            try {
+                Scte35Decoder scte35Decoder = new Scte35Decoder(false);
+                SpliceInfoSection spliceInfoSection = scte35Decoder.base64Decode(attributes);
+
+                Scte35 scte35 = Scte35.builder().cue(attributes).spliceInfoSection(spliceInfoSection).build();
+
+                builder.scte35(scte35);
+            } catch(DecodingException ignored){
+                throw new PlaylistParserException("scte35 parse failed");
+            }
+        }
+
+        @Override
+        public void write(MediaSegment mediaSegment, TextBuilder textBuilder) {
+            mediaSegment.scte35().ifPresent(key -> textBuilder.addTag(tag(), key.cue()));
+        }
+    },
+
     EXT_X_CUE_OUT {
         @Override
         public void read(MediaSegment.Builder builder, String attributes) {
-            builder.cueOut(Integer.parseInt(attributes));
+            builder.cueOut(Float.parseFloat(attributes));
         }
 
         @Override
@@ -110,6 +135,18 @@ enum MediaSegmentTag implements Tag<MediaSegment, MediaSegment.Builder> {
         @Override
         public void write(MediaSegment mediaSegment, TextBuilder textBuilder) {
             mediaSegment.segmentMap().ifPresent(value -> textBuilder.addTag(tag(), value, SegmentMapAttribute.attributeMap));
+        }
+    },
+
+    EXT_X_CUE_OUT_CONT {
+        @Override
+        public void read(MediaSegment.Builder builder, String attributes) throws PlaylistParserException {
+            builder.cueOutCont(CueOutContAttribute.parse(attributes));
+        }
+
+        @Override
+        public void write(MediaSegment mediaSegment, TextBuilder textBuilder) {
+            mediaSegment.cueOutCont().ifPresent(key -> textBuilder.addTag(tag(), key, CueOutContAttribute.attributeMap));
         }
     },
 
@@ -173,7 +210,8 @@ enum MediaSegmentTag implements Tag<MediaSegment, MediaSegment.Builder> {
         public void write(MediaSegment mediaSegment, TextBuilder textBuilder) {
             mediaSegment.segmentKey().ifPresent(key -> textBuilder.addTag(tag(), key, SegmentKeyAttribute.attributeMap));
         }
-    };
+    }
+    ;
 
     static final Map<String, MediaSegmentTag> tags = ParserUtils.toMap(values(), Tag::tag);
 }

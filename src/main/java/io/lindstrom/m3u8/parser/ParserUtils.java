@@ -24,7 +24,7 @@ class ParserUtils {
     static final String YES = "YES";
     static final String NO = "NO";
     static final String CLIENT_ATTRIBUTE = "CLIENT-ATTRIBUTE";
-    static final Pattern ATTRIBUTE_LIST_PATTERN = Pattern.compile("([A-Z0-9\\-]+)=(?:(?:\"([^\"]+)\")|([^,]+))");
+    static final Pattern ATTRIBUTE_LIST_PATTERN = Pattern.compile("([a-zA-Z0-9\\-]+)=(?:(?:\"([^\"]+)\")|([^,]+))");
 
     private static final Pattern BYTE_RANGE_PATTERN = Pattern.compile("(\\d+)(?:@(\\d+))?");
 
